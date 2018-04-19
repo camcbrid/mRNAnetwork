@@ -1,12 +1,15 @@
-function [Gsparse,corrmat,params] = networkdeconv(dataclean, datatag, ploton)
+function [Gsparse,corrmat,params] = networkdeconv(dataclean, mincounts, datatag, ploton)
 %run network deconvoution alogrithm 3: "Network deconvolution as a general
 %method to distinguish direct dependencies in networks" Feizi Nature 2013.
 %Algorithm takes ~40 mins for mRNA dataset with 12000 genes and 1500 cells.
 
 if nargin < 2
-    datatag = '';
+    mincounts = min(size(dataclean));
     if nargin < 3
-        ploton = False;
+        datatag = '';
+        if nargin < 4
+            ploton = False;
+        end
     end
 end
 
@@ -14,14 +17,14 @@ disp(datatag)
 
 %calculate correlation matrix with robust Spearman correlation metric
 disp('calculating correlations...'); tic
-[corrmat,pmat] = corr(dataclean','Type','Spearman'); %1644 sec
-corrthresh = corrmat;
-corrthresh(pmat > 0.05) = 0;
+[corrmat,~] = corr(dataclean','Type','Spearman'); %1644 sec
+% corrthresh = corrmat;
+% corrthresh(pmat > 0.05) = 0;
 toc
 
 %calculate evals with sparse eval decomposition
 disp('calculating largest eigenvalues...'); tic
-lambdainit = eigs(corrthresh,6);
+lambdainit = eigs(corrmat,6);
 disp(lambdainit)
 lambdaP = max(lambdainit);
 toc
@@ -29,12 +32,12 @@ toc
 %scaling correlation matrix
 beta = 0.45;    %needs to be < 0.5 so max(abs(eval(Gobs))) < 1
 alpha = beta/((1-beta)*lambdaP);
-Gobs = alpha*corrthresh;
+Gobs = alpha*corrmat;
 
 %use sparse eigenvalue decomposition to speed up process
 %matrix has at most num_cells non-zero eigenvalues
 disp('recalculating eigenvalues...'); tic
-[V,D,flg] = eigs(Gobs,min(size(dataclean)));    %1509 sec
+[V,D,flg] = eigs(Gobs,mincounts);    %1509 sec
 if flg ~= 0
     disp('not all eigenvalues converged')
 end
