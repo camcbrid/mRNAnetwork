@@ -1,4 +1,4 @@
-function neighborhoodnames = graph2names(G,names,gene,saveon,fnameout)
+function neighborhoodnames = graph2names(G,names,gene,saveon,datacond)
 %output all gene names connected to a gene according to the graph G. G
 %is a square adjacency symmetric matrix, names is a cell arry containing
 %all names of genes and is the same length as the dimensions of G, gene is
@@ -9,7 +9,7 @@ function neighborhoodnames = graph2names(G,names,gene,saveon,fnameout)
 
 %defaults
 if nargin < 5
-    fnameout = 'test.txt';
+    datacond = 'test.txt';
     if nargin < 4
         saveon = false;
         if nargin < 3
@@ -29,9 +29,10 @@ elseif isnumeric(gene)
     end
 else; disp('Error: gene is not a name or index number'); geneind = 1;
 end
-if strcmp(fnameout(end-3:end),'.txt')
-    fnameout = [fnameout,'.txt'];
+if strcmp(datacond(end-3:end),'.txt')
+    datacond = datacond(1:end-4);
 end
+datacond = strrep(datacond,' ','_');
 
 %compute names from graph
 if issymmetric(G)
@@ -54,12 +55,13 @@ end
 disp(names(geneind))
 if saveon
     %write to txt file
-    fileID = fopen(fnameout,'w');
-    formatSpec = '%s\n';
-    fprintf(fileID,formatSpec,[genename,' neighborhood']);
+    fileID = fopen([gene,'_neighs',datacond,'.txt'],'w');
+    fprintf(fileID,'%s\r\n',[names{geneind},' neighborhood ', datacond,':']);
+    fprintf(fileID,'%s\r\n','');
     for row = 1:size(neighborhoodnames,1)
-        fprintf(fileID,formatSpec,neighborhoodnames{row,:});
+        fprintf(fileID,'%s\r\n',[neighborhoodnames{row,:}]);
     end
+    fclose(fileID);
 else
     disp(neighborhoodnames)
 end
