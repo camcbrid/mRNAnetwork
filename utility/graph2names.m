@@ -1,4 +1,4 @@
-function neighborhoodnames = graph2names(G,names,gene,saveon,datacond)
+function neighborhoodnames = graph2names(G, names, gene, saveon, datacond)
 %output all gene names connected to a gene according to the graph G. G
 %is a square adjacency symmetric matrix, names is a cell arry containing
 %all names of genes and is the same length as the dimensions of G, gene is
@@ -18,7 +18,7 @@ if nargin < 5
     end
 end
 
-%input error handline
+%input error handling
 if ischar(gene)
     geneind = find(strcmp(gene,names));
 elseif isnumeric(gene)
@@ -50,12 +50,11 @@ else
     neighborhoodnames = intersect(neighborhoodnamesout,neighborhoodnamesin);
 end
 
-
 %output
 disp(names(geneind))
 if saveon
     %write to txt file
-    fileID = fopen([gene,'_neighs',datacond,'.txt'],'w');
+    fileID = fopen([gene,'_neigh',datacond,'.txt'],'w');
     fprintf(fileID,'%s\r\n',[names{geneind},' neighborhood ', datacond,':']);
     fprintf(fileID,'%s\r\n','');
     for row = 1:size(neighborhoodnames,1)

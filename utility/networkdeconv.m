@@ -1,4 +1,4 @@
-function [Gsparse,corrmat,params] = networkdeconv(dataclean, mincounts, datatag, ploton)
+function [Gsparse,Gnew,params] = networkdeconv(dataclean,mincounts,datatag,ploton)
 %run network deconvoution alogrithm 3: "Network deconvolution as a general
 %method to distinguish direct dependencies in networks" Feizi Nature 2013.
 %Algorithm takes ~40 mins for mRNA dataset with 12000 genes and 1500 cells.
@@ -18,8 +18,6 @@ disp(datatag)
 %calculate correlation matrix with robust Spearman correlation metric
 disp('calculating correlations...'); tic
 [corrmat,~] = corr(dataclean','Type','Spearman'); %1644 sec
-% corrthresh = corrmat;
-% corrthresh(pmat > 0.05) = 0;
 toc
 
 %calculate evals with sparse eval decomposition
@@ -47,7 +45,7 @@ toc
 disp('Deconvolving network...'); tic
 Dnew = D./(D+1);
 Gnew = V*Dnew/V;
-Gnew(diag(ones(length(Gnew),1)) == 1) = 0;
+Gnew = setdiagzeros(Gnew);
 Gsym = (Gnew + Gnew')/2;
 Gsparse = sparse(sign(Gsym));
 toc
@@ -57,9 +55,7 @@ params = struct;
 params.alpha = alpha;
 params.beta = beta;
 params.lambda = lambdaP;
-params.evals = Dnew(diag(ones(size(Dnew,1))) ~= 0);
-
-corrmat = setdiagzeros(corrmat);
+params.evals = diag(Dnew);
 
 if ploton
     %plot histogram of eigenvalues

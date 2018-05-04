@@ -1,4 +1,4 @@
-function [Gcv,params,Gtrain] = networkCV(data, func, p, q, parallelon)
+function [Gcv, params, Gtrain] = networkCV(data, func, p, q, parallelon)
 %run cross vaildation on network construction function. Data is matrix with
 %datapoints in each column and variables in each row. func is the function
 %handle of the graph construction function. p is the percentage of the
@@ -26,7 +26,6 @@ end
 
 %init
 Gtrain = cell(0);
-% Gtest = cell(0);
 
 if parallelon
     pool  = parpool(3);
@@ -36,7 +35,6 @@ if parallelon
         
         %run network construction function on data
         Gtrain{ii} = sparse(func(data(:,traininds)));
-        %Gtest{ii} = sparse(func(data(:,testinds)));
     end
     delete(pool);
     pause(5);
@@ -47,7 +45,6 @@ else
         
         %run network construction function on data
         Gtrain{ii} = sparse(func(data(:,traininds)));
-        %Gtest{ii} = sparse(func(data(:,testinds)));
     end
 end
 
